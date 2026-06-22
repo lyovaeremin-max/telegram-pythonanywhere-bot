@@ -1,4 +1,5 @@
 import os
+import random
 from datetime import datetime
 from bot.clients import bot, BOT_INFO, store
 from bot.config import COMMIT_SHA, HF_SPACE_ID, HOSTING_LABEL, MODEL, RATE_LIMIT
@@ -44,22 +45,44 @@ def _log(message, direction: str, text: str) -> None:
     ts = datetime.now().strftime("%H:%M:%S")
     print(f"[{ts}] {sender} → {receiver}: {snippet}", flush=True)
 
+#text container
+
+JOKES = [
+    "Почему программисты любят кофе? Потому что без него код не компилируется!",
+    "Баг — это не ошибка, это скрытая фича.",
+    "Оптимист видит стакан наполовину полным, пессимист — наполовину пустым, а программист — объект класса Стакан.",
+    "Почему Python такой дружелюбный? Потому что у него нет скобок, только улыбки :)",
+    "Компьютер — это устройство, которое решает все проблемы, которых у вас не было до его покупки."
+]
+
+#bot
+
+#start command
 
 @bot.message_handler(commands=["start"], func=is_allowed)
 def cmd_start(message):
     bot.send_message(
         message.chat.id,
-        "Hello! I'm your AI assistant. Send me a message to get started.\n\nUse /help to see available commands.",
-    )
+    "Привет я твой ИИ помощник поговорим?",
+ )
 
+#joke command
+
+@bot.message_handler(commands=["joke"], func=is_allowed)
+def cmd_joke(message):
+    joke = random.choice(JOKES)
+    bot.send_message(message.chat.id, joke)
+
+#help command
 
 @bot.message_handler(commands=["help"], func=is_allowed)
 def cmd_help(message):
     lines = [
-        "/start — welcome message",
-        "/help  — show this message",
-        "/reset — clear conversation history",
-        "/about — about this bot",
+        "/start — начать диалог",
+        "/help  — помощь (вы в этой окне)",
+        "/reset — очистить историю разговоров",
+        "/about — о боте",
+        "/joke - рассказывает шутки! хэхэ"
     ]
     if HF_SPACE_ID:
         lines.append("/model — switch AI provider")
@@ -89,6 +112,7 @@ def cmd_about(message):
         lines.append(f"Version: {COMMIT_SHA}")
     bot.send_message(message.chat.id, "\n".join(lines))
 
+# if else container
 
 if HF_SPACE_ID:
 
