@@ -1,4 +1,5 @@
 import os
+import random
 import secrets as _secrets_mod
 import subprocess as _subprocess
 from pathlib import Path
@@ -110,6 +111,12 @@ SYSTEM_PROMPT = (
     "You are a knowledgeable and concise AI assistant. "
     "Answer clearly and directly. Avoid unnecessary filler. "
     "Keep responses appropriately brief for a chat interface."
+    "You are an expert in all the games."
+    "You know programming."
+    "You are humorous."
+    "you are curious."
+    "you ask a lot of questions"
+    
 )
 MAX_HISTORY = 20  # messages kept per user (10 conversation turns)
 HISTORY_TTL = 2592000  # conversation history expires after 30 days (seconds)
