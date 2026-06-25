@@ -49,6 +49,68 @@ def _log(message, direction: str, text: str) -> None:
     ts = datetime.now().strftime("%H:%M:%S")
     print(f"[{ts}] {sender} → {receiver}: {snippet}", flush=True)
 
+# launge
+
+# user_lang = {}
+
+# def get_text(user_id, key):
+#     lang = user_lang.get(user_id, "ru")  # по умолчанию русский
+#     return LANGS[lang][key]
+
+# @bot.message_handler(commands=["lang"])
+# def change_lang(message):
+#     markup = InlineKeyboardMarkup()
+#     markup.add(
+#         InlineKeyboardButton("Русский", callback_data="lang_ru"),
+#         InlineKeyboardButton("English", callback_data="lang_en")
+#     )
+#     bot.send_message(message.chat.id, "Выберите язык / Choose language:", reply_markup=markup)
+
+# @bot.callback_query_handler(func=lambda call: call.data.startswith("lang_"))
+# def set_lang(call):
+#     lang = call.data.split("_")[1]
+#     user_lang[call.from_user.id] = lang
+#     bot.send_message(call.message.chat.id, f"Язык установлен: {lang}")
+
+# @bot.message_handler(commands=["story"])
+# def start_story(message):
+#     player_health[message.chat.id] = 3
+#     markup = InlineKeyboardMarkup()
+#     markup.add(
+#         InlineKeyboardButton(get_text(message.chat.id, "open_door"), callback_data="story_open"),
+#         InlineKeyboardButton(get_text(message.chat.id, "hide"), callback_data="story_hide")
+#     )
+#     bot.send_message(message.chat.id, get_text(message.chat.id, "story_intro"), reply_markup=markup)
+
+
+# LANGS = {
+#     "ru": {
+#         "start": "Добро пожаловать! Выберите действие:",
+#         "games": "Игры",
+#         "help": "Помощь",
+#         "story_intro": "🌙 3 часа ночи. Ты проснулся от стука в двери...",
+#         "open_door": "Открыть дверь",
+#         "hide": "Не открывать",
+#         "restart": "🔄 Начать заново",
+#         "menu": "🏠 Выйти в меню",
+#         "game_over": "💀 Ты погиб. Игра окончена.",
+#         "win": "🎉 Ты выжил!"
+#     },
+#     "en": {
+#         "start": "Welcome! Choose an action:",
+#         "games": "Games",
+#         "help": "Help",
+#         "story_intro": "🌙 It's 3 AM. You woke up from knocking at the door...",
+#         "open_door": "Open the door",
+#         "hide": "Do not open",
+#         "restart": "🔄 Restart",
+#         "menu": "🏠 Back to menu",
+#         "game_over": "💀 You died. Game over.",
+#         "win": "🎉 You survived!"
+#     }
+# }
+
+
 #text container
 
 JOKES = [
@@ -94,6 +156,7 @@ def cmd_start(message):
         InlineKeyboardButton("напомнить", callback_data="viewnote_start"),
         InlineKeyboardButton("напоминание по времени", callback_data="remind_start"),
         InlineKeyboardButton("удалить заметку", callback_data="deletenote_start"),
+        # InlineKeyboardButton("Язык🌎", callback_data="lang"),
     )
     markup.add(
         InlineKeyboardButton("Начать заново", callback_data="help_start"),
@@ -123,6 +186,7 @@ def menu_games(call):
         InlineKeyboardButton("Угадай число", callback_data="help_gamenumber"),
         InlineKeyboardButton("Камень ножници бумага", callback_data="help_rps"),
         InlineKeyboardButton("Математика", callback_data="help_math"),
+        InlineKeyboardButton("сюжет (Хоррор рекомендуется играть с хоррор музыкой)", callback_data="story"),
     )
     markup.add(
         InlineKeyboardButton("Назад", callback_data="menu_main"),
@@ -147,6 +211,7 @@ def menu_help(call):
         InlineKeyboardButton("напоминание по времени", callback_data="remind_start"),
         InlineKeyboardButton("удалить заметку", callback_data="deletenote_start"),
         InlineKeyboardButton("Сбросить", callback_data="help_reset"),
+        # InlineKeyboardButton("Язык🌎", callback_data="lang"),
     )
     markup.add(
         InlineKeyboardButton("Шутка", callback_data="help_joke"),
@@ -310,6 +375,7 @@ def cmd_help(message):
     markup.add(
         InlineKeyboardButton("Сбросить", callback_data="help_reset"),
         InlineKeyboardButton("О боте", callback_data="help_about"),
+        # InlineKeyboardButton("Язык🌎", callback_data="lang"),
     )
     markup.add(
         InlineKeyboardButton("Шутка", callback_data="help_joke"),
@@ -320,6 +386,7 @@ def cmd_help(message):
         InlineKeyboardButton("Викторина", callback_data="help_quiz"),
         InlineKeyboardButton("камень ножници бумага", callback_data="help_rps"),
         InlineKeyboardButton("Математика", callback_data="help_math"),
+        InlineKeyboardButton("сюжет (Хоррор рекомендуется играть с хоррор музыкой)", callback_data="story"),
     )
     
     # Отправляем сообщение с inline-кнопками
@@ -539,8 +606,100 @@ def check_math(call):
     start_math(call.message)
 
 
-# button container
 
+# Game 5
+
+
+player_health = {}
+
+def lose_health(chat_id):
+    if chat_id in player_health:
+        player_health[chat_id] -= 1
+        bot.send_message(chat_id, f"⏳ Время вышло! Ты потерял 1 здоровье. Осталось: {player_health[chat_id]}")
+        if player_health[chat_id] <= 0:
+            bot.send_message(chat_id, "💀 Ты погиб. Игра окончена.")
+            return
+
+@bot.message_handler(commands=["story"])
+def start_story(message):
+    player_health[message.chat.id] = 3
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton("Открыть дверь", callback_data="story_open"),
+        InlineKeyboardButton("Не открывать", callback_data="story_hide")
+    )
+    bot.send_message(message.chat.id, "🌙 3 часа ночи. Ты проснулся от стука в двери не просто стук а жуткий как будто дверь ломают. У тебя 70 секунд, чтобы решить что делать:", reply_markup=markup)
+    threading.Timer(70, lose_health, args=(message.chat.id,)).start()
+
+
+@bot.callback_query_handler(func=lambda call: call.data in [
+    "story_open", "story_hide", "story_jump", "story_hide2",
+    "story_GoToCar", "story_go", "story_car_theft", "story_onfoot"
+])
+def story_step(call):
+    if call.data == "story_open":
+        game_over(call.message.chat.id, "Ты открыл дверь... там пусто. Но стены стали красными, появился монстр, и он напал на тебя. 💀 Ты погиб.")
+
+    elif call.data == "story_hide":
+        markup = InlineKeyboardMarkup()
+        markup.add(
+            InlineKeyboardButton("Спрыгнуть с окна", callback_data="story_jump"),
+            InlineKeyboardButton("Прятаться", callback_data="story_hide2")
+        )
+        bot.send_message(call.message.chat.id, "Ты сделал вид, что дома никого нет.и у тебя снова 70 секунд! чтобы решить Стук продолжается... ключ повернулся в замке. что будешь делать?", reply_markup=markup)
+
+    elif call.data == "story_hide2":
+        game_over(call.message.chat.id, "Ты спрятался дома... монстр сломал дверь и нашёл тебя. 💀")
+
+    elif call.data == "story_jump":
+        markup = InlineKeyboardMarkup()
+        markup.add(
+            InlineKeyboardButton("идти к машине", callback_data="story_GoToCar"),
+            InlineKeyboardButton("Прогуляться", callback_data="story_go")
+        )
+        bot.send_message(call.message.chat.id, "Ты спрыгнул с окна и у тебя снова 70 секунд ты попал в аномалию. 🌌 Всё вокруг странное, людей нет... но в дали замечаешь машину в нем никого нет но двигатель работает ты слишишь звук фары тоже что ты сделаешь?", reply_markup=markup)
+
+    elif call.data == "story_GoToCar":
+        markup = InlineKeyboardMarkup()
+        markup.add(
+            InlineKeyboardButton("угнать машину", callback_data="story_car_theft"),
+            InlineKeyboardButton("остаться пешком", callback_data="story_onfoot")
+        )
+        bot.send_message(call.message.chat.id, "Ты подошёл к машине. У тебя снова 70 секунд чтобы решить магина щаведена в нем никого нет ключи в машине что сделаешь?", reply_markup=markup)
+
+    elif call.data == "story_car_theft":
+        markup = InlineKeyboardMarkup()
+        markup.add(
+        InlineKeyboardButton("🔄 Начать заново", callback_data="story_restart"),
+        InlineKeyboardButton("🏠 Выйти в меню", callback_data="menu_main")
+    )
+        bot.send_message(call.message.chat.id, "Ты угнал машину и уехал в безопасное место. 🎉 Ты выжил!", reply_markup=markup)
+
+
+    elif call.data == "story_onfoot":
+        game_over(call.message.chat.id, "Ты решил остаться пешком, но тебя нашли монстры. 💀")
+
+    elif call.data == "story_go":
+        game_over(call.message.chat.id, "Ты решил прогуляться... но аномалия усилилась, и ты потерял сознание. 💀")
+
+def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton("🔄 Начать заново", callback_data="story_restart"),
+        InlineKeyboardButton("🏠 Выйти в меню", callback_data="menu_main")
+    )
+    bot.send_message(chat_id, text, reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: call.data == "story_restart")
+def restart_story(call):
+    start_story(call.message)  # перезапуск игры
+
+
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "story")
+def start_story_callback(call):
+    start_story(call.message)  # вызываем ту же функцию, что и при команде /story
 
 
 
