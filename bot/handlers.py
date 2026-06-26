@@ -1,6 +1,8 @@
 import os
 import random
 import telebot
+import threading
+from datetime import datetime, timedelta
 from telebot.types import Message
 import threading
 # from telebot.types import ReplyKeyboardMarkup, KeyboardButton
@@ -240,8 +242,8 @@ def menu_main(call):
 
 # Обработчик команды "напомнить через время "версия 2" "
 
-import threading
-from datetime import datetime, timedelta
+# import threading
+# from datetime import datetime, timedelta
 
 @bot.message_handler(commands=["remind"], func=is_allowed)
 def remind_after_time(message):
@@ -261,19 +263,20 @@ def remind_after_time(message):
     time_str = parts[1]
     reminder_text = parts[2]
 
+   
     delay = None
-
+   
     try:
-        # Вариант 1: секунды (10s)
+        # секунды
         if time_str.endswith("s"):
             delay = int(time_str[:-1])
-        # Вариант 2: минуты (5m)
+        # минуты
         elif time_str.endswith("m"):
             delay = int(time_str[:-1]) * 60
-        # Вариант 3: часы (2h)
+        # часы
         elif time_str.endswith("h"):
             delay = int(time_str[:-1]) * 3600
-        # Вариант 4: конкретное время (10:00)
+        # конкретное время HH:MM
         elif ":" in time_str:
             target_time = datetime.strptime(time_str, "%H:%M").time()
             now = datetime.now()
@@ -294,7 +297,8 @@ def remind_after_time(message):
 
 def send_reminder(chat_id, text):
     bot.send_message(chat_id, f"🔔 Напоминание: {text}")
-
+    
+    
     #######
 
 
