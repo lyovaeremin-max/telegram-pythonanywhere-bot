@@ -187,7 +187,7 @@ def menu_games(call):
         InlineKeyboardButton("Угадай число", callback_data="help_gamenumber"),
         InlineKeyboardButton("Камень ножници бумага", callback_data="help_rps"),
         InlineKeyboardButton("Математика", callback_data="help_math"),
-        InlineKeyboardButton("сюжет (Хоррор рекомендуется играть с хоррор музыкой)", callback_data="story"),  # Исправлено
+        InlineKeyboardButton("сюжет введи команду /story (Хоррор рекомендуется играть с хоррор музыкой)", callback_data="story"),  # Исправлено
     )
     markup.add(
         InlineKeyboardButton("Назад", callback_data="menu_main"),
@@ -394,7 +394,7 @@ def cmd_help(message):
         InlineKeyboardButton("Викторина", callback_data="help_quiz"),
         InlineKeyboardButton("камень ножници бумага", callback_data="help_rps"),
         InlineKeyboardButton("Математика", callback_data="help_math"),
-        InlineKeyboardButton("сюжет (Хоррор рекомендуется играть с хоррор музыкой)", callback_data="story"),
+        InlineKeyboardButton("сюжет введи команду /story (Хоррор рекомендуется играть с хоррор музыкой)", callback_data="story"),
     )
     
     # Отправляем сообщение с inline-кнопками
