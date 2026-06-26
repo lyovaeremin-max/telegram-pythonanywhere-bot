@@ -702,8 +702,7 @@ def story_step(call):
 #     ...
 
 
-
-
+player_health = {}
 timers = {}
 
 def lose_health(chat_id):
@@ -729,7 +728,6 @@ def start_story(message: Message):
     timers[message.chat.id] = t
 
 def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
-    # отменяем таймер
     if chat_id in timers:
         timers[chat_id].cancel()
         del timers[chat_id]
@@ -740,6 +738,52 @@ def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
         InlineKeyboardButton("🏠 Выйти в меню", callback_data="menu_main")
     )
     bot.send_message(chat_id, text, reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: call.data == "story_restart")
+def restart_story(call):
+    start_story(call.message)
+
+
+
+
+
+
+# timers = {}
+
+# def lose_health(chat_id):
+#     if chat_id in player_health:
+#         player_health[chat_id] -= 1
+#         bot.send_message(chat_id, f"⏳ Время вышло! Ты потерял 1 здоровье. Осталось: {player_health[chat_id]}")
+#         if player_health[chat_id] <= 0:
+#             game_over(chat_id)
+
+# @bot.message_handler(commands=["story"])
+# def start_story(message: Message):
+#     player_health[message.chat.id] = 3
+#     markup = InlineKeyboardMarkup()
+#     markup.add(
+#         InlineKeyboardButton("Открыть дверь", callback_data="story_open"),
+#         InlineKeyboardButton("Не открывать", callback_data="story_hide")
+#     )
+#     bot.send_message(message.chat.id, "🌙 3 часа ночи. Ты проснулся от жуткого стука...", reply_markup=markup)
+
+#     # создаём таймер и сохраняем его
+#     t = threading.Timer(70, lose_health, args=(message.chat.id,))
+#     t.start()
+#     timers[message.chat.id] = t
+
+# def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
+#     # отменяем таймер
+#     if chat_id in timers:
+#         timers[chat_id].cancel()
+#         del timers[chat_id]
+
+#     markup = InlineKeyboardMarkup()
+#     markup.add(
+#         InlineKeyboardButton("🔄 Начать заново", callback_data="story_restart"),
+#         InlineKeyboardButton("🏠 Выйти в меню", callback_data="menu_main")
+#     )
+#     bot.send_message(chat_id, text, reply_markup=markup)
 
 
 
