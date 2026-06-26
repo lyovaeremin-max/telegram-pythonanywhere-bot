@@ -612,14 +612,14 @@ def check_math(call):
 
 
 player_health = {}
+timers = {}
 
 def lose_health(chat_id):
     if chat_id in player_health:
         player_health[chat_id] -= 1
         bot.send_message(chat_id, f"⏳ Время вышло! Ты потерял 1 здоровье. Осталось: {player_health[chat_id]}")
         if player_health[chat_id] <= 0:
-            bot.send_message(chat_id, "💀 Ты погиб. Игра окончена.")
-            return
+            game_over(chat_id)
 
 @bot.message_handler(commands=["story"])
 def start_story(message):
@@ -629,12 +629,13 @@ def start_story(message):
         InlineKeyboardButton("Открыть дверь", callback_data="story_open"),
         InlineKeyboardButton("Не открывать", callback_data="story_hide")
     )
-    bot.send_message(message.chat.id, "🌙 3 часа ночи. Ты проснулся от стука в двери не просто стук а жуткий как будто дверь ломают. У тебя 70 секунд, чтобы решить что делать:", reply_markup=markup)
+    bot.send_message(message.chat.id,
+        "🌙 3 часа ночи. Ты проснулся от стука в двери не просто стук а жуткий как будто дверь ломают. У тебя 70 секунд, чтобы решить что делать:",
+        reply_markup=markup
+    )
     t = threading.Timer(70, lose_health, args=(message.chat.id,))
-    t.start
-
-    # threading.Timer(70, lose_health, args=(message.chat.id,)).start()
-
+    t.start()
+    timers[message.chat.id] = t
 
 @bot.callback_query_handler(func=lambda call: call.data in [
     "story_open", "story_hide", "story_jump", "story_hide2",
@@ -650,8 +651,13 @@ def story_step(call):
             InlineKeyboardButton("Спрыгнуть с окна", callback_data="story_jump"),
             InlineKeyboardButton("Прятаться", callback_data="story_hide2")
         )
-        bot.send_message(call.message.chat.id, "Ты сделал вид, что дома никого нет.и у тебя снова 70 секунд! чтобы решить Стук продолжается... ключ повернулся в замке. что будешь делать?", reply_markup=markup)
-        threading.Timer(70, lose_health, args=(call.message.chat.id,)).start()
+        bot.send_message(call.message.chat.id,
+            "Ты сделал вид, что дома никого нет.и у тебя снова 70 секунд! чтобы решить Стук продолжается... ключ повернулся в замке. что будешь делать?",
+            reply_markup=markup
+        )
+        t = threading.Timer(70, lose_health, args=(call.message.chat.id,))
+        t.start()
+        timers[call.message.chat.id] = t
 
     elif call.data == "story_hide2":
         game_over(call.message.chat.id, "Ты спрятался дома... монстр сломал дверь и нашёл тебя. 💀")
@@ -662,10 +668,13 @@ def story_step(call):
             InlineKeyboardButton("идти к машине", callback_data="story_GoToCar"),
             InlineKeyboardButton("Прогуляться", callback_data="story_go")
         )
-        bot.send_message(call.message.chat.id, "Ты спрыгнул с окна и у тебя снова 70 секунд ты попал в аномалию. 🌌 Всё вокруг странное, людей нет... но в дали замечаешь машину в нем никого нет но двигатель работает ты слишишь звук фары тоже работают что ты сделаешь?", reply_markup=markup)
-        
-        
-        # threading.Timer(70, lose_health, args=(call.message.chat.id,)).start()
+        bot.send_message(call.message.chat.id,
+            "Ты спрыгнул с окна и у тебя снова 70 секунд ты попал в аномалию. 🌌 Всё вокруг странное, людей нет... но в дали замечаешь машину в нем никого нет но двигатель работает ты слишишь звук фары тоже работают что ты сделаешь?",
+            reply_markup=markup
+        )
+        t = threading.Timer(70, lose_health, args=(call.message.chat.id,))
+        t.start()
+        timers[call.message.chat.id] = t
 
     elif call.data == "story_GoToCar":
         markup = InlineKeyboardMarkup()
@@ -673,17 +682,21 @@ def story_step(call):
             InlineKeyboardButton("угнать машину", callback_data="story_car_theft"),
             InlineKeyboardButton("остаться пешком", callback_data="story_onfoot")
         )
-        bot.send_message(call.message.chat.id, "Ты подошёл к машине. У тебя снова 70 секунд чтобы решить магина щаведена в нем никого нет ключи в машине что сделаешь?", reply_markup=markup)
-        threading.Timer(70, lose_health, args=(call.message.chat.id,)).start()
+        bot.send_message(call.message.chat.id,
+            "Ты подошёл к машине. У тебя снова 70 секунд чтобы решить магина щаведена в нем никого нет ключи в машине что сделаешь?",
+            reply_markup=markup
+        )
+        t = threading.Timer(70, lose_health, args=(call.message.chat.id,))
+        t.start()
+        timers[call.message.chat.id] = t
 
     elif call.data == "story_car_theft":
         markup = InlineKeyboardMarkup()
         markup.add(
-        InlineKeyboardButton("🔄 Начать заново", callback_data="story_restart"),
-        InlineKeyboardButton("🏠 Выйти в меню", callback_data="menu_main")
-    )
+            InlineKeyboardButton("🔄 Начать заново", callback_data="story_restart"),
+            InlineKeyboardButton("🏠 Выйти в меню", callback_data="menu_main")
+        )
         bot.send_message(call.message.chat.id, "Ты угнал машину и уехал в безопасное место. 🎉 Ты выжил!", reply_markup=markup)
-
 
     elif call.data == "story_onfoot":
         game_over(call.message.chat.id, "Ты решил остаться пешком, но тебя нашли монстры. 💀")
@@ -691,42 +704,10 @@ def story_step(call):
     elif call.data == "story_go":
         game_over(call.message.chat.id, "Ты решил прогуляться... но аномалия усилилась, и ты потерял сознание. 💀")
 
-
-
-
-
-
-# @bot.message_handler(commands=["story"])
-# def start_story(message: Message):
-#     ...
-
-
-
-
-# timers = {}
-
-# t = threading.Timer(70, lose_health, args=(Message.chat.id,))
-# t.start()
-# timers[Message.chat.id] = t
-
-
-# def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
-#     # Останавливаем таймер, если он есть
-#     if chat_id in timers:
-#         timers[chat_id].cancel()
-#         del timers[chat_id]
-
-#     markup = InlineKeyboardMarkup()
-#     markup.add(
-#         InlineKeyboardButton("🔄 Начать заново", callback_data="story_restart"),
-#         InlineKeyboardButton("🏠 Выйти в меню", callback_data="menu_main")
-#     )
-#     bot.send_message(chat_id, text, reply_markup=markup)
-
-
-
-
 def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
+    if chat_id in timers:
+        timers[chat_id].cancel()
+        del timers[chat_id]
     markup = InlineKeyboardMarkup()
     markup.add(
         InlineKeyboardButton("🔄 Начать заново", callback_data="story_restart"),
@@ -736,14 +717,7 @@ def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
 
 @bot.callback_query_handler(func=lambda call: call.data == "story_restart")
 def restart_story(call):
-    start_story(call.message)  # перезапуск игры
-
-
-
-
-# @bot.callback_query_handler(func=lambda call: call.data == "story")
-# def start_story_callback(call):
-#     start_story(call.message)  # вызываем ту же функцию, что и при команде /story
+    start_story(call.message)
 
 
 
