@@ -5,7 +5,7 @@ from telebot.types import Message
 import threading
 # from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 from datetime import datetime
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton  # Добавлено
+from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton  # Добавлено
 from bot.clients import bot, BOT_INFO, store
 from bot.config import COMMIT_SHA, HF_SPACE_ID, HOSTING_LABEL, MODEL, RATE_LIMIT
 from bot.ai import ask_ai
@@ -192,6 +192,12 @@ def menu_games(call):
     markup.add(
         InlineKeyboardButton("Назад", callback_data="menu_main"),
     )
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "story")
+def start_story_callback(call):
+    start_story(call.message)
+
     
 
 # Добавляем обработчик для callback data "story"
@@ -397,12 +403,34 @@ def cmd_help(message):
         InlineKeyboardButton("сюжет (Хоррор рекомендуется играть с хоррор музыкой)", callback_data="story"),
     )
     
-    # Отправляем сообщение с inline-кнопками
-    bot.send_message(
-        message.chat.id,
-        "Выберите действие из меню ниже:",
-        reply_markup=markup,
-    )
+
+from telebot.types import Message
+
+@bot.message_handler(commands=["help"])
+def cmd_help(message: Message):
+    ...
+
+
+
+
+# Отправляем сообщение с inline-кнопками
+# bot.send_message(
+#     message.chat.id,
+#     "Выберите действие из меню ниже:",
+#     reply_markup=markup,
+# )
+
+
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "story")
+def start_story_callback(call):
+    start_story(call.message)  # вызываем ту же функцию, что и при команде /story
+
+
+
+
+
 
 # Обработчик для inline-кнопок из меню помощи
 @bot.callback_query_handler(func=lambda call: call.data.startswith("help_"))
