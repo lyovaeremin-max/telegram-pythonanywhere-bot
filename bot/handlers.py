@@ -187,12 +187,19 @@ def menu_games(call):
         InlineKeyboardButton("Угадай число", callback_data="help_gamenumber"),
         InlineKeyboardButton("Камень ножници бумага", callback_data="help_rps"),
         InlineKeyboardButton("Математика", callback_data="help_math"),
-        InlineKeyboardButton("сюжет (Хоррор рекомендуется играть с хоррор музыкой)", callback_data="story"),
+        InlineKeyboardButton("сюжет (Хоррор рекомендуется играть с хоррор музыкой)", callback_data="story"),  # Исправлено
     )
     markup.add(
         InlineKeyboardButton("Назад", callback_data="menu_main"),
     )
     
+
+# Добавляем обработчик для callback data "story"
+# @bot.callback_query_handler(func=lambda call: call.data == "story")
+# def handle_story_callback(call):
+#     start_story(call.message)
+
+
     # Отправляем сообщение с меню игр
     bot.send_message(
         call.message.chat.id,
