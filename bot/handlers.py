@@ -696,37 +696,26 @@ def story_step(call):
 
 
 
-@bot.message_handler(commands=["story"])
-def start_story(message: Message):
-    ...
+# @bot.message_handler(commands=["story"])
+# def start_story(message: Message):
+#     ...
 
 
 
 
-timers = {}
+# timers = {}
 
-t = threading.Timer(70, lose_health, args=(Message.chat.id,))
-t.start()
-timers[Message.chat.id] = t
-
-
-def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
-    # Останавливаем таймер, если он есть
-    if chat_id in timers:
-        timers[chat_id].cancel()
-        del timers[chat_id]
-
-    markup = InlineKeyboardMarkup()
-    markup.add(
-        InlineKeyboardButton("🔄 Начать заново", callback_data="story_restart"),
-        InlineKeyboardButton("🏠 Выйти в меню", callback_data="menu_main")
-    )
-    bot.send_message(chat_id, text, reply_markup=markup)
-
-
+# t = threading.Timer(70, lose_health, args=(Message.chat.id,))
+# t.start()
+# timers[Message.chat.id] = t
 
 
 # def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
+#     # Останавливаем таймер, если он есть
+#     if chat_id in timers:
+#         timers[chat_id].cancel()
+#         del timers[chat_id]
+
 #     markup = InlineKeyboardMarkup()
 #     markup.add(
 #         InlineKeyboardButton("🔄 Начать заново", callback_data="story_restart"),
@@ -734,16 +723,27 @@ def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
 #     )
 #     bot.send_message(chat_id, text, reply_markup=markup)
 
-# @bot.callback_query_handler(func=lambda call: call.data == "story_restart")
-# def restart_story(call):
-#     start_story(call.message)  # перезапуск игры
+
+
+
+def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton("🔄 Начать заново", callback_data="story_restart"),
+        InlineKeyboardButton("🏠 Выйти в меню", callback_data="menu_main")
+    )
+    bot.send_message(chat_id, text, reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: call.data == "story_restart")
+def restart_story(call):
+    start_story(call.message)  # перезапуск игры
 
 
 
 
-@bot.callback_query_handler(func=lambda call: call.data == "story")
-def start_story_callback(call):
-    start_story(call.message)  # вызываем ту же функцию, что и при команде /story
+# @bot.callback_query_handler(func=lambda call: call.data == "story")
+# def start_story_callback(call):
+#     start_story(call.message)  # вызываем ту же функцию, что и при команде /story
 
 
 
