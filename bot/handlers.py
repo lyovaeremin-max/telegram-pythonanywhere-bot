@@ -1,8 +1,6 @@
 import os
 import random
 import telebot
-import threading
-from datetime import datetime, timedelta
 from telebot.types import Message
 import threading
 # from telebot.types import ReplyKeyboardMarkup, KeyboardButton
@@ -173,7 +171,7 @@ def cmd_start(message):
     # Отправляем сообщение с главным меню
     bot.send_message(
         message.chat.id,
-        "LLLLДобро пожаловать! Выберите действие из меню ниже:" \
+        "Добро пожаловать! Выберите действие из меню ниже:" \
         "Вы так же можете общятся с ботом:" \
         "ВНИМАНИЕ не передовайте боту личные данные поскольку это может быть не безопасно",
         reply_markup=markup,
@@ -242,8 +240,17 @@ def menu_main(call):
 
 # Обработчик команды "напомнить через время "версия 2" "
 
-# import threading
-# from datetime import datetime, timedelta
+@bot.callback_query_handler(func=lambda call: call.data == "remind_start")
+def handle_remind_start(call):
+    bot.send_message(
+        call.message.chat.id,
+        "Чтобы установить напоминание, напиши команду:\n"
+        "/remind [время в секундах] [текст]\n"
+        "Пример: /remind 10 Выпить воды"
+    )
+
+
+# Обработчик команды "напомнить через время"
 
 @bot.message_handler(commands=["remind"], func=is_allowed)
 def remind_after_time(message):
@@ -251,55 +258,26 @@ def remind_after_time(message):
     if len(parts) < 3:
         bot.send_message(
             message.chat.id,
-            "❌ Формат: /remind [время] [текст]\n"
-            "Примеры:\n"
-            "/remind 10s Выпить воды\n"
-            "/remind 5m Сделать зарядку\n"
-            "/remind 2h Позвонить другу\n"
-            "/remind 10:00 Встреча"
+            "❌ Неверный формат. Используйте: /remind [время в секундах] [текст напоминания].\n"
+            "Пример: /remind 10 Выпить воды"
         )
         return
 
-    time_str = parts[1]
-    reminder_text = parts[2]
-
-   
-    delay = None
-   
     try:
-        # секунды
-        if time_str.endswith("s"):
-            delay = int(time_str[:-1])
-        # минуты
-        elif time_str.endswith("m"):
-            delay = int(time_str[:-1]) * 60
-        # часы
-        elif time_str.endswith("h"):
-            delay = int(time_str[:-1]) * 3600
-        # конкретное время HH:MM
-        elif ":" in time_str:
-            target_time = datetime.strptime(time_str, "%H:%M").time()
-            now = datetime.now()
-            target_dt = datetime.combine(now.date(), target_time)
-            if target_dt < now:  # если время уже прошло, переносим на завтра
-                target_dt += timedelta(days=1)
-            delay = (target_dt - now).seconds
-        else:
-            bot.send_message(message.chat.id, "❌ Неверный формат времени.")
-            return
+        delay = int(parts[1])  # Время в секундах
+        reminder_text = parts[2]  # Текст напоминания
     except ValueError:
-        bot.send_message(message.chat.id, "❌ Ошибка в формате времени.")
+        bot.send_message(message.chat.id, "❌ Время должно быть числом. Попробуйте снова.")
         return
 
     bot.send_message(message.chat.id, f"⏳ Напоминание установлено через {delay} секунд.")
+
+    # Запускаем таймер
     threading.Timer(delay, send_reminder, args=(message.chat.id, reminder_text)).start()
 
-
 def send_reminder(chat_id, text):
+    """Функция для отправки напоминания."""
     bot.send_message(chat_id, f"🔔 Напоминание: {text}")
-    
-    
-    #######
 
 
 def save_note(user_id, note):
