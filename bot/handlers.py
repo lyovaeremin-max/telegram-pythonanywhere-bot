@@ -630,7 +630,10 @@ def start_story(message):
         InlineKeyboardButton("Не открывать", callback_data="story_hide")
     )
     bot.send_message(message.chat.id, "🌙 3 часа ночи. Ты проснулся от стука в двери не просто стук а жуткий как будто дверь ломают. У тебя 70 секунд, чтобы решить что делать:", reply_markup=markup)
-    threading.Timer(70, lose_health, args=(message.chat.id,)).start()
+    t = threading.Timer(70, lose_health, args=(message.chat.id,))
+    t.start
+
+    # threading.Timer(70, lose_health, args=(message.chat.id,)).start()
 
 
 @bot.callback_query_handler(func=lambda call: call.data in [
@@ -660,7 +663,10 @@ def story_step(call):
             InlineKeyboardButton("Прогуляться", callback_data="story_go")
         )
         bot.send_message(call.message.chat.id, "Ты спрыгнул с окна и у тебя снова 70 секунд ты попал в аномалию. 🌌 Всё вокруг странное, людей нет... но в дали замечаешь машину в нем никого нет но двигатель работает ты слишишь звук фары тоже работают что ты сделаешь?", reply_markup=markup)
-        threading.Timer(70, lose_health, args=(call.message.chat.id,)).start()
+        t = threading.Timer(70, lose_health, args=(message.chat.id,))
+        t.start
+        
+        # threading.Timer(70, lose_health, args=(call.message.chat.id,)).start()
 
     elif call.data == "story_GoToCar":
         markup = InlineKeyboardMarkup()
@@ -691,22 +697,39 @@ def story_step(call):
 
 
 
-@bot.message_handler(commands=["story"])
-def start_story(message: Message):
-    ...
+# @bot.message_handler(commands=["story"])
+# def start_story(message: Message):
+#     ...
 
 
 
 
 timers = {}
 
-t = threading.Timer(70, lose_health, args=(Message.chat.id,))
-t.start()
-timers[Message.chat.id] = t
+def lose_health(chat_id):
+    if chat_id in player_health:
+        player_health[chat_id] -= 1
+        bot.send_message(chat_id, f"⏳ Время вышло! Ты потерял 1 здоровье. Осталось: {player_health[chat_id]}")
+        if player_health[chat_id] <= 0:
+            game_over(chat_id)
 
+@bot.message_handler(commands=["story"])
+def start_story(message: Message):
+    player_health[message.chat.id] = 3
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton("Открыть дверь", callback_data="story_open"),
+        InlineKeyboardButton("Не открывать", callback_data="story_hide")
+    )
+    bot.send_message(message.chat.id, "🌙 3 часа ночи. Ты проснулся от жуткого стука...", reply_markup=markup)
+
+    # создаём таймер и сохраняем его
+    t = threading.Timer(70, lose_health, args=(message.chat.id,))
+    t.start()
+    timers[message.chat.id] = t
 
 def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
-    # Останавливаем таймер, если он есть
+    # отменяем таймер
     if chat_id in timers:
         timers[chat_id].cancel()
         del timers[chat_id]
@@ -717,6 +740,7 @@ def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
         InlineKeyboardButton("🏠 Выйти в меню", callback_data="menu_main")
     )
     bot.send_message(chat_id, text, reply_markup=markup)
+
 
 
 
@@ -736,9 +760,9 @@ def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
 
 
 
-@bot.callback_query_handler(func=lambda call: call.data == "story")
-def start_story_callback(call):
-    start_story(call.message)  # вызываем ту же функцию, что и при команде /story
+# @bot.callback_query_handler(func=lambda call: call.data == "story")
+# def start_story_callback(call):
+#     start_story(call.message)  # вызываем ту же функцию, что и при команде /story
 
 
 
