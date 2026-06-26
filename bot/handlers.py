@@ -240,17 +240,8 @@ def menu_main(call):
 
 # Обработчик команды "напомнить через время "версия 2" "
 
-@bot.callback_query_handler(func=lambda call: call.data == "remind_start")
-def handle_remind_start(call):
-    bot.send_message(
-        call.message.chat.id,
-        "Чтобы установить напоминание, напиши команду:\n"
-        "/remind [время в секундах] [текст]\n"
-        "Пример: /remind 10 Выпить воды"
-    )
-
-
-# Обработчик команды "напомнить через время"
+import threading
+from datetime import datetime, timedelta
 
 @bot.message_handler(commands=["remind"], func=is_allowed)
 def remind_after_time(message):
@@ -258,26 +249,53 @@ def remind_after_time(message):
     if len(parts) < 3:
         bot.send_message(
             message.chat.id,
-            "❌ Неверный формат. Используйте: /remind [время в секундах] [текст напоминания].\n"
-            "Пример: /remind 10 Выпить воды"
+            "❌ Формат: /remind [время] [текст]\n"
+            "Примеры:\n"
+            "/remind 10s Выпить воды\n"
+            "/remind 5m Сделать зарядку\n"
+            "/remind 2h Позвонить другу\n"
+            "/remind 10:00 Встреча"
         )
         return
 
+    time_str = parts[1]
+    reminder_text = parts[2]
+
+    delay = None
+
     try:
-        delay = int(parts[1])  # Время в секундах
-        reminder_text = parts[2]  # Текст напоминания
+        # Вариант 1: секунды (10s)
+        if time_str.endswith("s"):
+            delay = int(time_str[:-1])
+        # Вариант 2: минуты (5m)
+        elif time_str.endswith("m"):
+            delay = int(time_str[:-1]) * 60
+        # Вариант 3: часы (2h)
+        elif time_str.endswith("h"):
+            delay = int(time_str[:-1]) * 3600
+        # Вариант 4: конкретное время (10:00)
+        elif ":" in time_str:
+            target_time = datetime.strptime(time_str, "%H:%M").time()
+            now = datetime.now()
+            target_dt = datetime.combine(now.date(), target_time)
+            if target_dt < now:  # если время уже прошло, переносим на завтра
+                target_dt += timedelta(days=1)
+            delay = (target_dt - now).seconds
+        else:
+            bot.send_message(message.chat.id, "❌ Неверный формат времени.")
+            return
     except ValueError:
-        bot.send_message(message.chat.id, "❌ Время должно быть числом. Попробуйте снова.")
+        bot.send_message(message.chat.id, "❌ Ошибка в формате времени.")
         return
 
     bot.send_message(message.chat.id, f"⏳ Напоминание установлено через {delay} секунд.")
-
-    # Запускаем таймер
     threading.Timer(delay, send_reminder, args=(message.chat.id, reminder_text)).start()
 
+
 def send_reminder(chat_id, text):
-    """Функция для отправки напоминания."""
     bot.send_message(chat_id, f"🔔 Напоминание: {text}")
+
+    #######
 
 
 def save_note(user_id, note):
