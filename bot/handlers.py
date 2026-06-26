@@ -726,7 +726,7 @@ def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
 def restart_story(call):
     start_story(call.message)
 
-
+####VUHSDBCJIDBSNOFWE
 
 
         #messegs container
