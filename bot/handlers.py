@@ -1,6 +1,7 @@
 import os
 import random
 import telebot
+from telebot import types
 from telebot.types import Message
 import threading
 # from telebot.types import ReplyKeyboardMarkup, KeyboardButton
@@ -143,6 +144,26 @@ MOODS = [
 ]
 
 #bot
+
+# from telebot import types
+
+commands = [
+    types.BotCommand("start", "Запустить бота"),
+    types.BotCommand("help", "Меню помощи"),
+    types.BotCommand("joke", "Случайная шутка"),
+    types.BotCommand("fact", "Случайный факт"),
+    types.BotCommand("quiz", "Викторина"),
+    types.BotCommand("gamenumber", "Угадай число"),
+    types.BotCommand("rps", "Камень-ножницы-бумага"),
+    types.BotCommand("math", "Математика"),
+    types.BotCommand("story", "Хоррор-квест"),
+]
+
+bot.set_my_commands(commands)
+
+
+
+
 
 #start command
 
