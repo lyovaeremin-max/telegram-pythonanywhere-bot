@@ -642,11 +642,10 @@ def start_story(message):
     )
 
 
-@bot.callback_query_handler(func=lambda call: call.data in [
-    "story_open", "story_hide", "story_jump", "story_hide2",
-    "story_GoToCar", "story_go", "story_car_theft", "story_onfoot"
-])
+@bot.callback_query_handler(func=lambda call: call.data.startswith("story_"))
 def story_step(call):
+    bot.answer_callback_query(call.id)  # Убираем индикатор загрузки
+
     if call.data == "story_open":
         game_over(call.message.chat.id, "Ты открыл дверь... там пусто. Но стены стали красными, появился монстр, и он напал на тебя. 💀 Ты погиб.")
 
@@ -657,10 +656,9 @@ def story_step(call):
             InlineKeyboardButton("Прятаться", callback_data="story_hide2")
         )
         bot.send_message(call.message.chat.id,
-            "Ты сделал вид, что дома никого нет.и у тебя снова 70 секунд! чтобы решить Стук продолжается... ключ повернулся в замке. что будешь делать?",
+            "Ты сделал вид, что дома никого нет. И у тебя снова 70 секунд! Чтобы решить. Стук продолжается... ключ повернулся в замке. Что будешь делать?",
             reply_markup=markup
         )
-    
 
     elif call.data == "story_hide2":
         game_over(call.message.chat.id, "Ты спрятался дома... монстр сломал дверь и нашёл тебя. 💀")
@@ -668,25 +666,24 @@ def story_step(call):
     elif call.data == "story_jump":
         markup = InlineKeyboardMarkup()
         markup.add(
-            InlineKeyboardButton("идти к машине", callback_data="story_GoToCar"),
+            InlineKeyboardButton("Идти к машине", callback_data="story_GoToCar"),
             InlineKeyboardButton("Прогуляться", callback_data="story_go")
         )
         bot.send_message(call.message.chat.id,
-            "Ты спрыгнул с окна и у тебя снова 70 секунд ты попал в аномалию. 🌌 Всё вокруг странное, людей нет... но в дали замечаешь машину в нем никого нет но двигатель работает ты слишишь звук фары тоже работают что ты сделаешь?",
+            "Ты спрыгнул с окна и у тебя снова 70 секунд. Ты попал в аномалию. 🌌 Всё вокруг странное, людей нет... Но вдалеке замечаешь машину. В ней никого нет, но двигатель работает, и ты слышишь звук. Фары тоже работают. Что ты сделаешь?",
             reply_markup=markup
         )
-       
+
     elif call.data == "story_GoToCar":
         markup = InlineKeyboardMarkup()
         markup.add(
-            InlineKeyboardButton("угнать машину", callback_data="story_car_theft"),
-            InlineKeyboardButton("остаться пешком", callback_data="story_onfoot")
+            InlineKeyboardButton("Угнать машину", callback_data="story_car_theft"),
+            InlineKeyboardButton("Остаться пешком", callback_data="story_onfoot")
         )
         bot.send_message(call.message.chat.id,
-            "Ты подошёл к машине. У тебя снова 70 секунд чтобы решить магина щаведена в нем никого нет ключи в машине что сделаешь?",
+            "Ты подошёл к машине. У тебя снова 70 секунд, чтобы решить. Машина заведена, в ней никого нет, ключи в машине. Что сделаешь?",
             reply_markup=markup
         )
-      
 
     elif call.data == "story_car_theft":
         markup = InlineKeyboardMarkup()
