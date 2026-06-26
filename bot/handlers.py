@@ -5,7 +5,7 @@ from telebot.types import Message
 import threading
 # from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 from datetime import datetime
-from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton  # Добавлено
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton  # Добавлено
 from bot.clients import bot, BOT_INFO, store
 from bot.config import COMMIT_SHA, HF_SPACE_ID, HOSTING_LABEL, MODEL, RATE_LIMIT
 from bot.ai import ask_ai
@@ -192,12 +192,6 @@ def menu_games(call):
     markup.add(
         InlineKeyboardButton("Назад", callback_data="menu_main"),
     )
-
-
-@bot.callback_query_handler(func=lambda call: call.data == "story")
-def start_story_callback(call):
-    start_story(call.message)
-
     
 
 # Добавляем обработчик для callback data "story"
@@ -403,34 +397,12 @@ def cmd_help(message):
         InlineKeyboardButton("сюжет (Хоррор рекомендуется играть с хоррор музыкой)", callback_data="story"),
     )
     
-
-from telebot.types import Message
-
-@bot.message_handler(commands=["help"])
-def cmd_help(message: Message):
-    ...
-
-
-
-
-# Отправляем сообщение с inline-кнопками
-# bot.send_message(
-#     message.chat.id,
-#     "Выберите действие из меню ниже:",
-#     reply_markup=markup,
-# )
-
-
-
-
-@bot.callback_query_handler(func=lambda call: call.data == "story")
-def start_story_callback(call):
-    start_story(call.message)  # вызываем ту же функцию, что и при команде /story
-
-
-
-
-
+    # Отправляем сообщение с inline-кнопками
+    bot.send_message(
+        message.chat.id,
+        "Выберите действие из меню ниже:",
+        reply_markup=markup,
+    )
 
 # Обработчик для inline-кнопок из меню помощи
 @bot.callback_query_handler(func=lambda call: call.data.startswith("help_"))
@@ -668,9 +640,7 @@ def start_story(message):
         "🌙 3 часа ночи. Ты проснулся от стука в двери не просто стук а жуткий как будто дверь ломают. У тебя 70 секунд, чтобы решить что делать:",
         reply_markup=markup
     )
-    t = threading.Timer(70, lose_health, args=(message.chat.id,))
-    t.start()
-    timers[message.chat.id] = t
+
 
 @bot.callback_query_handler(func=lambda call: call.data in [
     "story_open", "story_hide", "story_jump", "story_hide2",
@@ -690,9 +660,7 @@ def story_step(call):
             "Ты сделал вид, что дома никого нет.и у тебя снова 70 секунд! чтобы решить Стук продолжается... ключ повернулся в замке. что будешь делать?",
             reply_markup=markup
         )
-        t = threading.Timer(70, lose_health, args=(call.message.chat.id,))
-        t.start()
-        timers[call.message.chat.id] = t
+    
 
     elif call.data == "story_hide2":
         game_over(call.message.chat.id, "Ты спрятался дома... монстр сломал дверь и нашёл тебя. 💀")
@@ -707,10 +675,7 @@ def story_step(call):
             "Ты спрыгнул с окна и у тебя снова 70 секунд ты попал в аномалию. 🌌 Всё вокруг странное, людей нет... но в дали замечаешь машину в нем никого нет но двигатель работает ты слишишь звук фары тоже работают что ты сделаешь?",
             reply_markup=markup
         )
-        t = threading.Timer(70, lose_health, args=(call.message.chat.id,))
-        t.start()
-        timers[call.message.chat.id] = t
-
+       
     elif call.data == "story_GoToCar":
         markup = InlineKeyboardMarkup()
         markup.add(
@@ -721,9 +686,7 @@ def story_step(call):
             "Ты подошёл к машине. У тебя снова 70 секунд чтобы решить магина щаведена в нем никого нет ключи в машине что сделаешь?",
             reply_markup=markup
         )
-        t = threading.Timer(70, lose_health, args=(call.message.chat.id,))
-        t.start()
-        timers[call.message.chat.id] = t
+      
 
     elif call.data == "story_car_theft":
         markup = InlineKeyboardMarkup()
@@ -754,7 +717,7 @@ def game_over(chat_id, text="💀 Ты погиб. Игра окончена."):
 def restart_story(call):
     start_story(call.message)
 
-####VUHSDBCJIDBSNOFWE
+
 
 
         #messegs container
